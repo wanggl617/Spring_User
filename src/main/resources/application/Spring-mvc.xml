@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+                            http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd
+                            http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+
+    <mvc:annotation-driven/>
+
+    <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+        <property name="prefix" value="/pages/"/>
+        <property name="suffix" value=".jsp"/>
+    </bean>
+
+    <mvc:default-servlet-handler/>
+    <context:component-scan base-package="com"/>
+
+    
+<!--    拦截器的配置-->
+    <mvc:interceptors>
+        <mvc:interceptor>
+            <!-- 配置哪些资源进行拦截   -->
+            <mvc:mapping path="/**"/>
+            <!-- 配置哪些操作   不进行拦截     -->
+            <!-- 对进行登录的操作不进行拦截  如果拦截/user/login 则无法进行登录操作，页面提交的用户名密码提交不上去，然后又被拦截器拦截进入登录界面  -->
+            <mvc:exclude-mapping path="/user/login"/>
+            <bean class="com.domain.User.interceptor.PrivilegeInterceptor"/>
+        </mvc:interceptor>
+    </mvc:interceptors>
+
+<!--    简单映射异常处理器-->
+    <bean class="org.springframework.web.servlet.handler.SimpleMappingExceptionResolver">
+        <!-- 默认错误视图  先判断下面的异常映射，如果找不到对应的异常映射则跳转到默认视图-->
+        <property name="defaultErrorView" value="error"/>
+        <property name="exceptionMappings">
+            <map>
+                <!-- key:异常类型    value: 要跳转的错误视图 -->
+                <entry key="java.lang.ClassCastException" value="error1"/>
+                <!-- 自定义异常类-->
+                <entry key="com.exception.MyException" value="error2"/>
+            </map>
+        </property>
+    </bean>
+
+<!--    配置自定义异常处理器-->
+    <bean class="com.MyException.MyExceptionResolver"/>
+
+</beans>
